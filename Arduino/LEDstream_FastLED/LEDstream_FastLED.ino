@@ -23,10 +23,15 @@
 
 // --- General Settings
 static const uint16_t 
-	Num_Leds   =  80;        // strip length
+	Num_Leds   =  60;        // strip length
 static const uint8_t
-	Led_Pin    =  6,         // Arduino data output pin
-	Brightness =  255;       // maximum brightness
+	Led_Pin    =  13,        // Arduino data output pin
+// --- BlinkyTape Setings
+	BUTTON_IN  =  10,
+	ANALOG_INPUT= A9,
+	EXTRA_PIN_A=   7,
+	EXTRA_PIN_B=  11,
+	Brightness =  93;        // maximum brightness
 
 // --- FastLED Setings
 #define LED_TYPE     WS2812B // led strip type for FastLED
@@ -129,7 +134,18 @@ void setup(){
 		FastLED.show();
 	#endif
 
+	pinMode(BUTTON_IN, INPUT_PULLUP);
+	pinMode(ANALOG_INPUT, INPUT_PULLUP);
+	pinMode(EXTRA_PIN_A, INPUT_PULLUP);
+	pinMode(EXTRA_PIN_B, INPUT_PULLUP);
+
+	// Interrupt set-up; see Atmega32u4 datasheet section 11
+	PCIFR  |= (1 << PCIF0); // Just in case, clear interrupt flag
+	PCMSK0 |= (1 << PCINT6); // Set interrupt mask to the button pin (PCINT6)
+	PCICR  |= (1 << PCIE0); // Enable interrupt
+
 	Serial.begin(SerialSpeed);
+  while (!Serial1);
 	Serial.print("Ada\n"); // Send ACK string to host
 
 	lastByteTime = lastAckTime = millis(); // Set initial counters
